@@ -8,7 +8,6 @@ from cryptography.hazmat.primitives import serialization
 import time
 
 # Paths
-PRIVATE_KEY_PATH = "keys/private_key.pem"
 PUBLIC_KEY_PATH = "keys/public_key.pem"
 INPUT_PATH = "messages/msg_signed.txt"
 
