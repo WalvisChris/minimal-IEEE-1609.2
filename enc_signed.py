@@ -1,5 +1,5 @@
 from lib.TerminalInterface import *
-from lib.minimalASN1 import *
+from lib.asn1.signedASN1 import *
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization

@@ -6,9 +6,11 @@ import os
 KEY_DIR = "keys/"
 PRIVATE_KEY_FILE = os.path.join(KEY_DIR, "private_key.pem")
 PUBLIC_KEY_FILE = os.path.join(KEY_DIR, "public_key.pem")
+PSK_KEY_FILE = os.path.join(KEY_DIR, "psk.txt")
 CURVE = ec.SECP256R1()
 
 # 1. Maak de map aan
+os.system('cls')
 os.makedirs(KEY_DIR, exist_ok=True)
 
 # 2. Genereer de keys
@@ -34,8 +36,10 @@ with open(PUBLIC_KEY_FILE, "wb") as f:
     f.write(public_pem)
 print("public key aangemaakt")
 
-# 5. Publieke attributen instellen
-private_key = private_key
-public_key = public_key
+# 5. PSK
+psk = os.urandom(16)
+with open(PSK_KEY_FILE, "wb") as f:
+    f.write(psk)
+print("psk aangemaakt")
 
 print("INFO: De nieuwe sleutels zijn beschikbaar via keys.private_key en keys.public_key.")
