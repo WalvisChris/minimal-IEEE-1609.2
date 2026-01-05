@@ -19,13 +19,17 @@ _gebruikt `lib/TerminalInterface` als CLI._
 
 Het is belangrijk om te benoemen dat zowel de signature van de payload als de originele payload (in ToBeSignedData) worden gestuurd naar de ontvanger, zodat deze de signature kan vergelijken en valideren.  
 
+De ontvanger voert tijdscontrole en signature validatie uit.  
+
 # Encrypted Data  
 _gebruikt `pyasn1` dmv `lib/asn1/encryptedASN1.py`._  
 _gebruikt `lib/TerminalInterface` als CLI._  
 
 `enc_encrypted.py` -> `messages/encrypted.txt` -> `dec_encrypted.py`  
 
-**Uitleg:**  
+**Uitleg:**  pre shared key is van te voren gedeeld met zender en ontvanger(s) als `psk`. `pskId` = eerste 8 bytes van psk. nonce is random waarde van max 12 bytes. `AESCCM` sleutel wordt aangemaakt o.b.v. psk. `ciphertext` wordt gemaakt door cryptografische functie van AESCCM in combinatie met payload_bytes en nonce. pskId wordt met ontvangers gedeeld in `PreSharedKeyRecipientInfo`. nonce en ciphertext worden gedeeld met `One28BitCcmCiphertext`. `recipients` is een lijst van `recipientInfo`. recipients en ciphertext worden gecombineerd tot `EncryptedData`. Deze wordt in `Ieee1602Dot2Data` presenteer format opgeslagen.  
+
+De ontvanger voert pskId validatie en encryptie uit.  
 
 # Enveloped Data  
 _gebruikt `pyasn1` dmv `lib/asn1/envelopedASN1.py`._  
