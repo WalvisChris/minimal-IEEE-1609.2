@@ -21,6 +21,16 @@ Het is belangrijk om te benoemen dat zowel de signature van de payload als de or
 
 De ontvanger voert tijdscontrole en signature validatie uit.  
 
+# Signed Data (certificate) 
+_gebruikt `pyasn1` dmv `lib/asn1/signedCertASN1.py`._  
+_gebruikt `lib/TerminalInterface` als CLI._  
+
+`enc_signedCert.py` -> `messages/signedCert.txt` -> `dec_signedCert.py`  
+
+**Uitleg:**  
+
+De ontvanger voert tijdscontrole en signature validatie uit. 
+
 # Encrypted Data  
 _gebruikt `pyasn1` dmv `lib/asn1/encryptedASN1.py`._  
 _gebruikt `lib/TerminalInterface` als CLI._  
@@ -38,4 +48,3 @@ _gebruikt `lib/TerminalInterface` als CLI._
 `enc_enveloped.py` -> `messages/enveloped.txt` -> `dec_enveloped.py`  
 
 **Uitleg:**  
-<TODO>  
