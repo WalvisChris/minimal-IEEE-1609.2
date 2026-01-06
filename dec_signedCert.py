@@ -1,8 +1,10 @@
 from lib.asn1.signedCertASN1 import *
 from lib.TerminalInterface import *
 from pyasn1.codec.der import encoder, decoder
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature, Prehashed
 import time
 
 # Paths
@@ -12,6 +14,12 @@ INPUT_PATH = "messages/msg_signedCert.txt"
 # Terminal
 terminal = TerminalInterface()
 terminal.clear()
+
+# Checks
+certTimeCheck = False
+timeCheck = False
+sigCheck = False
+certCheck = False
 
 # Variables
 with open(PUBLIC_KEY_PATH, "rb") as f:
@@ -45,24 +53,87 @@ expiry = start + duration_hours * 3600  # omzet naar seconden
 now = int(time.time())
 
 if now > expiry:
-    terminal.demoLog(title="Certificaat Tijdcontrole", text="Bericht verlopen!", text_color="red")
+    certTimeMsg = "Certificaat verlopen!"
+    pass
 elif now < start:
-    terminal.demoLog(title="Certificaat Tijdcontrole", text="Bericht uit de toekomst!", text_color="red")
+    certTimeMsg = "Certificaat uit de toekomst!"
+    pass
 else:
-    terminal.demoLog(title="Certificaat Tijdcontrole", text="Geldig bericht.", text_color="green")
+    certTimeMsg = "Geldig Certificaat."
+    certTimeCheck = True
 
 # === Tijdscontrole ===
 _generation = int(header['generationTime'])
 _expiry = int(header['expiryTime'])
 _now = int(time.time() * 1_000_000)
 if _now > _expiry:
-    terminal.demoLog(title="Tijdcontrole", text="Bericht verlopen!", text_color="red")
+    timeMsg = "Bericht verlopen!"
+    pass
 elif _now < _generation:
-    terminal.demoLog(title="Tijdcontrole", text="Bericht uit de toekomst!", text_color="red")
+    timeMsg = "Bericht uit de toekomst!"
+    pass
 else:
-    terminal.demoLog(title="Tijdcontrole", text="Geldig bericht.", text_color="green")
+    timeMsg = "Geldig bericht."
+    timeCheck = True
 
-# === Certificate Validatie ===
+# === Public key ophalen ===
+verify_key_indicator = tbs_cert['verifyKeyIndicator']
+ecc_point = verify_key_indicator['ecdsaNistP256']['uncompressed']
 
+x_bytes = bytes(ecc_point['x'])
+y_bytes = bytes(ecc_point['y'])
+
+x = int.from_bytes(x_bytes, 'big')
+y = int.from_bytes(y_bytes, 'big')
+
+public_numbers = ec.EllipticCurvePublicNumbers(x, y, ec.SECP256R1())
+cert_public_key = public_numbers.public_key(default_backend())
+
+# === Signature uitpakken ===
+signature_asn1 = signed_data['signature']['ecdsaNistP256Signature']
+r_bytes = bytes(signature_asn1['r'])
+s_bytes = bytes(signature_asn1['s'])
+
+r = int.from_bytes(r_bytes, 'big')
+s = int.from_bytes(s_bytes, 'big')
+
+signature_der = encode_dss_signature(r, s)
+
+# === Hash berekenen ===
+tbs_der = encoder.encode(tbs_data)
+digest = hashes.Hash(hashes.SHA256())
+digest.update(tbs_der)
+hash_value = digest.finalize()
 
 # === Signature Validatie ===
+try:
+    cert_public_key.verify(
+        signature_der,
+        hash_value,
+        ec.ECDSA(Prehashed(hashes.SHA256()))
+    )
+    sigMsg="Geldig!"
+    sigCheck = True
+except Exception as e:
+    sigMsg = f"Ongeldig! {e}"
+    pass
+
+# === Certificate Validatie ===
+cert_signature = bytes(signer_cert['signature'])
+cert_tbs_der = encoder.encode(tbs_cert)
+
+try:
+    cert_public_key.verify(
+        cert_signature,
+        cert_tbs_der,
+        ec.ECDSA(hashes.SHA256())
+    )
+    certMsg = "Geldig!"
+    certCheck = True
+except Exception as e:
+    certMsg = f"Ongeldig! {e}"
+    pass
+
+# === RAPPORT ===
+terminal.logValidation(certTimeCheck, timeCheck, sigCheck, certCheck)
+terminal.logDetailedValidation(certTimeMsg, timeMsg, sigMsg, certMsg)

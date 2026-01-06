@@ -11,7 +11,6 @@ import os
 
 # Paths
 PRIVATE_KEY_PATH = "keys/private_key.pem"
-PUBLIC_KEY_PATH = "keys/public_key.pem"
 OUTPUT_PATH = "messages/msg_signedCert.txt"
 
 # Terminal
@@ -61,12 +60,33 @@ valPeriod = ValidityPeriod()
 valPeriod['start'] = int(time.time())
 valPeriod['duration'] = duration
 
+# === UncompressedP256 ===
+uncompressed = UncompressedP256()
+
+PUBLIC_KEY = PRIVATE_KEY.public_key()
+numbers = PUBLIC_KEY.public_numbers()
+
+x_bytes = numbers.x.to_bytes(32, 'big')
+y_bytes = numbers.y.to_bytes(32, 'big')
+
+uncompressed['x'] = x_bytes
+uncompressed['y'] = y_bytes
+
+# === EccP256CurvePoint ===
+point = EccP256CurvePoint()
+point['uncompressed'] = uncompressed
+
+# === VerificationKeyIndicator =
+verify_key = VerificationKeyIndicator()
+verify_key['ecdsaNistP256'] = point
+
 # === ToBeSignedCertificate ===
 tbs_cert = ToBeSignedCertificate()
 tbs_cert['id'] = certId
 tbs_cert['cracaId'] = HashedId3(b'\x01\x02\x03')
 tbs_cert['crlSeries'] = 0
 tbs_cert['validityPeriod'] = valPeriod
+tbs_cert['verifyKeyIndicator'] = verify_key
 
 # === IssuerIdentifier ===
 issuer = IssuerIdentifier()
@@ -96,13 +116,10 @@ signature_der = PRIVATE_KEY.sign(
 )
 r, s = decode_dss_signature(signature_der)
 
-# === EccP256CurvePoint ===
-curve_point = EccP256CurvePoint()
-curve_point['x-only'] = r.to_bytes(32, 'big')
-
+# === ECDSA Signature ===
 ecdsa_sig = EcdsaP256Signature()
-ecdsa_sig['rSig'] = curve_point
-ecdsa_sig['sSig'] = s.to_bytes(32, 'big')
+ecdsa_sig['r'] = r.to_bytes(32, 'big')
+ecdsa_sig['s'] = s.to_bytes(32, 'big')
 
 # === Signature ===
 signature = Signature()

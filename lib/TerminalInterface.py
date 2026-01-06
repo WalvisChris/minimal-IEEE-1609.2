@@ -159,4 +159,37 @@ class TerminalInterface:
 
         print(result)
 
+    def logValidation(self, cert_time=None, time=None, sig=None, cert=None):     
+        resultaten = [cert_time, time, sig, cert]
+        output = ["Nvt", "Nvt", "Nvt", "Nvt"]
+        FAIL = self.COLORS["red"]
+        SUCCES = self.COLORS["bright_green"]
+        RESET = self.RESET
+        
+        for i, resultaat in enumerate(resultaten):
+            if resultaat != None:
+                output[i] = f"{SUCCES}Geldig!{RESET}" if resultaat else f"{FAIL}Ongeldig!{RESET}"
 
+        self.text(text="[Encoding Rapport]:")
+        self.text(text=f"- Bericht Tijdcontrole: {output[1]}")
+        self.text(text=f"- Certificate Tijdcontrole: {output[0]}")
+        self.text(text=f"- Signature Validatie: {output[2]}")
+        self.text(text=f"- Certificate Validatie: {output[3]}")
+        self.empty()
+    
+    def logDetailedValidation(self, certTimeMsg=None, timeMsg=None, sigMsg=None, certMsg=None):
+        resultaten = [certTimeMsg, timeMsg, sigMsg, certMsg]
+        output = ["Nvt", "Nvt", "Nvt", "Nvt"]
+        LOG = self.COLORS['vs_yellow']
+        RESET = self.RESET
+
+        for i, resultaat in enumerate(resultaten):
+            if resultaat != None:
+                output[i] = f"{LOG}{resultaat}{RESET}"
+        
+        self.text(text="[Uitgebreid Encoding Rapport]:")
+        self.text(text=f"- Bericht Tijdcontrole: {output[1]}")
+        self.text(text=f"- Certificate Tijdcontrole: {output[0]}")
+        self.text(text=f"- Signature Validatie: {output[2]}")
+        self.text(text=f"- Certificate Validatie: {output[3]}")
+        self.empty()

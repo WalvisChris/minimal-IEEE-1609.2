@@ -39,16 +39,30 @@ class ToBeSignedData(univ.Sequence):
         namedtype.NamedType('headerInfo', HeaderInfo())
     )
 
+class UncompressedP256(univ.Sequence):
+    componentType = namedtype.NamedTypes(
+        namedtype.NamedType('x', univ.OctetString()),
+        namedtype.NamedType('y', univ.OctetString())
+    )
+
 # CHOICE > SEQUENCE
+class EccP256CurvePoint(univ.Sequence):
+    componentType = namedtype.NamedTypes(
+        namedtype.NamedType('uncompressed', UncompressedP256())
+    )
+
+# CHOICE > SEQUENCE
+"""
 class EccP256CurvePoint(univ.Sequence):
     componentType = namedtype.NamedTypes(
         namedtype.NamedType('x-only', univ.OctetString(subtypeSpec=constraint.ValueSizeConstraint(32, 32)))
     )
-
+"""
+    
 class EcdsaP256Signature(univ.Sequence):
     componentType = namedtype.NamedTypes(
-        namedtype.NamedType('rSig', EccP256CurvePoint()),
-        namedtype.NamedType('sSig', univ.OctetString(subtypeSpec=constraint.ValueSizeConstraint(32, 32)))
+        namedtype.NamedType('r', univ.OctetString(subtypeSpec=constraint.ValueSizeConstraint(32, 32))),
+        namedtype.NamedType('s', univ.OctetString(subtypeSpec=constraint.ValueSizeConstraint(32, 32)))
     )
 
 # CHOICE > SEQUENCE
@@ -96,13 +110,19 @@ class ValidityPeriod(univ.Sequence):
         namedtype.NamedType('duration', Duration())
     )
 
+# CHOICE > SEQUENCE
+class VerificationKeyIndicator(univ.Sequence):
+    componentType = namedtype.NamedTypes(
+        namedtype.NamedType('ecdsaNistP256', EccP256CurvePoint())
+    )
+
 class ToBeSignedCertificate(univ.Sequence):
     componentType = namedtype.NamedTypes(
         namedtype.NamedType('id', CertificateId()),
         namedtype.NamedType('cracaId', HashedId3()),
         namedtype.NamedType('crlSeries', CrlSeries()),
         namedtype.NamedType('validityPeriod', ValidityPeriod()),
-        namedtype.NamedType('encryptionKey', PublicEncryptionKey())
+        namedtype.NamedType('verifyKeyIndicator', VerificationKeyIndicator())
     )
 
 class CertificateType(univ.Enumerated):
