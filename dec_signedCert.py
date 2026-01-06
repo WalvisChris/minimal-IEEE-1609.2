@@ -53,10 +53,10 @@ expiry = start + duration_hours * 3600  # omzet naar seconden
 now = int(time.time())
 
 if now > expiry:
-    certTimeMsg = "Certificaat verlopen!"
+    certTimeMsg = "Certificaat is verlopen!"
     pass
 elif now < start:
-    certTimeMsg = "Certificaat uit de toekomst!"
+    certTimeMsg = "Certificaat komt uit de toekomst!"
     pass
 else:
     certTimeMsg = "Geldig Certificaat."
@@ -67,10 +67,10 @@ _generation = int(header['generationTime'])
 _expiry = int(header['expiryTime'])
 _now = int(time.time() * 1_000_000)
 if _now > _expiry:
-    timeMsg = "Bericht verlopen!"
+    timeMsg = "Bericht is verlopen!"
     pass
 elif _now < _generation:
-    timeMsg = "Bericht uit de toekomst!"
+    timeMsg = "Bericht komt uit de toekomst!"
     pass
 else:
     timeMsg = "Geldig bericht."
@@ -112,10 +112,10 @@ try:
         hash_value,
         ec.ECDSA(Prehashed(hashes.SHA256()))
     )
-    sigMsg="Geldig!"
+    sigMsg="Geldige Handtekening!"
     sigCheck = True
 except Exception as e:
-    sigMsg = f"Ongeldig! {e}"
+    sigMsg = f"Ongeldige Handtekening! {e}"
     pass
 
 # === Certificate Validatie ===
@@ -128,12 +128,12 @@ try:
         cert_tbs_der,
         ec.ECDSA(hashes.SHA256())
     )
-    certMsg = "Geldig!"
+    certMsg = "Geldig Certificaat!"
     certCheck = True
 except Exception as e:
-    certMsg = f"Ongeldig! {e}"
+    certMsg = f"Ongeldig Certificaat! {e}"
     pass
 
 # === RAPPORT ===
-terminal.logValidation(certTimeCheck, timeCheck, sigCheck, certCheck)
-terminal.logDetailedValidation(certTimeMsg, timeMsg, sigMsg, certMsg)
+terminal.logValidation(cert_time=certTimeCheck, time=timeCheck, sig=sigCheck, cert=certCheck)
+terminal.logDetailedValidation(certTimeMsg=certTimeMsg, timeMsg=timeMsg, sigMsg=sigMsg, certMsg=certMsg)

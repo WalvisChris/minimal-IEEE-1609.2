@@ -1,4 +1,4 @@
-from pyasn1.type import univ, namedtype, constraint, namedval, char, tag
+from pyasn1.type import univ, namedtype, constraint, namedval, char
 
 class HashedId32(univ.OctetString):
     subtypeSpec = constraint.ValueSizeConstraint(32, 32)

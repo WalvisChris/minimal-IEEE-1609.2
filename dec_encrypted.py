@@ -1,13 +1,8 @@
 from lib.TerminalInterface import *
 from lib.asn1.encryptedASN1 import *
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.utils import Prehashed, decode_dss_signature
 from cryptography.hazmat.primitives.ciphers.aead import AESCCM
-from pyasn1.codec.der import encoder, decoder
-import os
+from pyasn1.codec.der import decoder
 
 # Paths
 PSK_PATH = "keys/psk.txt"
@@ -16,6 +11,10 @@ INPUT_PATH = "messages/msg_encrypted.txt"
 # Terminal
 terminal = TerminalInterface()
 terminal.clear()
+
+# Checks
+encCheck = False
+pskIdCheck = False
 
 # Variables
 with open(PSK_PATH, "rb") as f:
@@ -53,9 +52,10 @@ digest.update(psk)
 expected_pskId = digest.finalize()[:8]
 
 if received_pskId != expected_pskId:
-    terminal.demoLog(title="pskId validation", text="no match!", text_color="red")
+    pskIdMsg = "PskId Matched Niet!"
 else:
-    terminal.demoLog(title="pskId validation", text="match!", text_color="green")
+    pskIdMsg = "PskId Matched!"
+    pskIdCheck = True
 
 
 # === Decryptie ===
@@ -66,6 +66,11 @@ try:
         data=ciphertext,
         associated_data=None
     )
-    terminal.demoLog(title="decryption", text=plaintext)
+    encMsg = f"gelukt: {plaintext}"
+    encCheck = True
 except:
-    terminal.demoLog(title="decryption", text="failed.", text_color="red")
+    encMsg = "mislukt."
+
+# === RAPPORT ===
+terminal.logValidation(enc=encCheck, pskId=pskIdCheck)
+terminal.logDetailedValidation(encMsg=encMsg, pskIdMsg=pskIdMsg)

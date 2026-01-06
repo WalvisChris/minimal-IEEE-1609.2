@@ -159,9 +159,9 @@ class TerminalInterface:
 
         print(result)
 
-    def logValidation(self, cert_time=None, time=None, sig=None, cert=None):     
-        resultaten = [cert_time, time, sig, cert]
-        output = ["Nvt", "Nvt", "Nvt", "Nvt"]
+    def logValidation(self, cert_time=None, time=None, sig=None, cert=None, enc=None, pskId=None):     
+        resultaten = [cert_time, time, sig, cert, enc, pskId]
+        output = ["--", "--", "--", "--", "--", "--"]
         FAIL = self.COLORS["red"]
         SUCCES = self.COLORS["bright_green"]
         RESET = self.RESET
@@ -175,11 +175,13 @@ class TerminalInterface:
         self.text(text=f"- Certificate Tijdcontrole: {output[0]}")
         self.text(text=f"- Signature Validatie: {output[2]}")
         self.text(text=f"- Certificate Validatie: {output[3]}")
+        self.text(text=f"- Encryptie: {output[4]}")
+        self.text(text=f"- PskId Validatie: {output[5]}")
         self.empty()
     
-    def logDetailedValidation(self, certTimeMsg=None, timeMsg=None, sigMsg=None, certMsg=None):
-        resultaten = [certTimeMsg, timeMsg, sigMsg, certMsg]
-        output = ["Nvt", "Nvt", "Nvt", "Nvt"]
+    def logDetailedValidation(self, certTimeMsg=None, timeMsg=None, sigMsg=None, certMsg=None, encMsg=None, pskIdMsg=None):
+        resultaten = [certTimeMsg, timeMsg, sigMsg, certMsg, encMsg, pskIdMsg]
+        output = ["--", "--", "--", "--", "--", "--"]
         LOG = self.COLORS['vs_yellow']
         RESET = self.RESET
 
@@ -192,4 +194,6 @@ class TerminalInterface:
         self.text(text=f"- Certificate Tijdcontrole: {output[0]}")
         self.text(text=f"- Signature Validatie: {output[2]}")
         self.text(text=f"- Certificate Validatie: {output[3]}")
+        self.text(text=f"- Encryptie: {output[4]}")
+        self.text(text=f"- PskId Validatie: {output[5]}")
         self.empty()

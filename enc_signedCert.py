@@ -1,11 +1,10 @@
-from lib.TerminalInterface import *
-from lib.asn1.signedCertASN1 import *
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.utils import Prehashed, decode_dss_signature
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.backends import default_backend
 from pyasn1.codec.der import encoder
+from lib.asn1.signedCertASN1 import *
+from lib.TerminalInterface import *
 import time
 import os
 
@@ -21,6 +20,7 @@ terminal.clear()
 
 # Variables
 payload_bytes = payload.encode('utf-8')
+
 PSID = 0x20
 GENERATION_TIME = int(time.time() * 1_000_000)
 EXPIRY_TIME = GENERATION_TIME + 10_000_000
@@ -32,102 +32,70 @@ with open(PRIVATE_KEY_PATH, "rb") as key_file:
         backend=default_backend()
     )
 
-# === SignedDataPayload ===
-signed_payload = SignedDataPayload()
-signed_payload['data'] = payload_bytes
-
-# === HeaderInfo ===
-header = HeaderInfo()
-header['psid'] = PSID
-header['generationTime'] = GENERATION_TIME
-header['expiryTime'] = EXPIRY_TIME
-
 # === ToBeSignedData ===
 tbs_data = ToBeSignedData()
-tbs_data['payload'] = signed_payload
-tbs_data['headerInfo'] = header
+tbs_data['payload'] = SignedDataPayload()
+tbs_data['payload']['data'] = payload_bytes
+tbs_data['headerInfo'] = HeaderInfo()
+tbs_data['headerInfo']['psid'] = PSID
+tbs_data['headerInfo']['generationTime'] = GENERATION_TIME
+tbs_data['headerInfo']['expiryTime'] = EXPIRY_TIME
 
-# === CertificateId ===
-certId = CertificateId()
-certId['name'] = "demo_pijlwagen"
-
-# === Duration ===
-duration = Duration()
-duration['hours'] = 24
-
-# === ValidityPeriod ===
-valPeriod = ValidityPeriod()
-valPeriod['start'] = int(time.time())
-valPeriod['duration'] = duration
-
-# === UncompressedP256 ===
-uncompressed = UncompressedP256()
+# === VerifyKeyIndicator ===
+verify_key = VerificationKeyIndicator()
 
 PUBLIC_KEY = PRIVATE_KEY.public_key()
 numbers = PUBLIC_KEY.public_numbers()
-
 x_bytes = numbers.x.to_bytes(32, 'big')
 y_bytes = numbers.y.to_bytes(32, 'big')
 
-uncompressed['x'] = x_bytes
-uncompressed['y'] = y_bytes
-
-# === EccP256CurvePoint ===
-point = EccP256CurvePoint()
-point['uncompressed'] = uncompressed
-
-# === VerificationKeyIndicator =
-verify_key = VerificationKeyIndicator()
-verify_key['ecdsaNistP256'] = point
+verify_key['ecdsaNistP256'] = EccP256CurvePoint()
+verify_key['ecdsaNistP256']['uncompressed'] = UncompressedP256()
+verify_key['ecdsaNistP256']['uncompressed']['x'] = x_bytes
+verify_key['ecdsaNistP256']['uncompressed']['y'] = y_bytes
 
 # === ToBeSignedCertificate ===
 tbs_cert = ToBeSignedCertificate()
-tbs_cert['id'] = certId
-tbs_cert['cracaId'] = HashedId3(b'\x01\x02\x03')
-tbs_cert['crlSeries'] = 0
-tbs_cert['validityPeriod'] = valPeriod
+tbs_cert['id'] = CertificateId()
+tbs_cert['id']['name'] = "pijlwagen1234" # PLACEHOLDER
+tbs_cert['cracaId'] = HashedId3(b'\x01\x02\x03') # PLACEHOLDER
+tbs_cert['crlSeries'] = 0 # PLACEHOLDER
+tbs_cert['validityPeriod'] = ValidityPeriod()
+tbs_cert['validityPeriod']['start'] = int(time.time())
+tbs_cert['validityPeriod']['duration'] = Duration()
+tbs_cert['validityPeriod']['duration']['hours'] = 24
 tbs_cert['verifyKeyIndicator'] = verify_key
 
-# === IssuerIdentifier ===
-issuer = IssuerIdentifier()
-issuer['sha256AndDigest'] = os.urandom(8) # placeholder
-
-# === Certificate ===
-cert = Certificate()
-cert['version'] = 1
-cert['type'] = CertificateType(0)
-cert['issuer'] = issuer
-cert['toBeSignedCert'] = tbs_cert
+# === Signer ===
+signer = SignerIdentifier()
+signer['certificate'] = Certificate()
+signer['certificate']['version'] = 1
+signer['certificate']['type'] = CertificateType(0)
+signer['certificate']['issuer'] = IssuerIdentifier()
+signer['certificate']['issuer']['sha256AndDigest'] = os.urandom(8) # PLACEHOLDER
+signer['certificate']['toBeSignedCert'] = tbs_cert
 
 cert_tbs_der = encoder.encode(tbs_cert)
 cert_signature = PRIVATE_KEY.sign(cert_tbs_der, ec.ECDSA(hashes.SHA256()))
 
-cert['signature'] = cert_signature
+signer['certificate']['signature'] = cert_signature
 
-# === HASHING ===
+# === Signature ===
+signature = Signature()
+
 tbs_der = encoder.encode(tbs_data)
 digest = hashes.Hash(hashes.SHA256())
 digest.update(tbs_der)
 hash_value = digest.finalize()
 
-# === SIGNING ===
 signature_der = PRIVATE_KEY.sign(
     hash_value, ec.ECDSA(Prehashed(hashes.SHA256()))
 )
 r, s = decode_dss_signature(signature_der)
 
-# === ECDSA Signature ===
-ecdsa_sig = EcdsaP256Signature()
-ecdsa_sig['r'] = r.to_bytes(32, 'big')
-ecdsa_sig['s'] = s.to_bytes(32, 'big')
-
-# === Signature ===
-signature = Signature()
-signature['ecdsaNistP256Signature'] = ecdsa_sig
-
-# === SignerIdentifier ===
-signer = SignerIdentifier()
-signer['certificate'] = cert
+signature['ecdsaNistP256Signature'] = EcdsaP256Signature()
+signature['ecdsaNistP256Signature']['r'] = r.to_bytes(32, 'big')
+signature['ecdsaNistP256Signature']['s'] = s.to_bytes(32, 'big')
 
 # === SignedData ===
 signed_data = SignedData()
@@ -136,24 +104,18 @@ signed_data['tbsData'] = tbs_data
 signed_data['signer'] = signer
 signed_data['signature'] = signature
 
-# === Ieee1609Dot2Content ===
-ieee_content = Ieee1609Dot2Content()
-ieee_content['signedData'] = signed_data
-
 # === Ieee1609Dot2Data ===
 ieee_data = Ieee1609Dot2Data()
 ieee_data['protocolVersion'] = 3
-ieee_data['content'] = ieee_content
+ieee_data['content'] = Ieee1609Dot2Content()
+ieee_data['content']['signedData'] = signed_data
 
-# === TESTING ===
-terminal.printASN1(ieee_data)
-
-# === DER ENCODING ===
+# Send
 final_bytes = encoder.encode(ieee_data)
-
-# === SEND MESSAGE ===
 with open(OUTPUT_PATH, "wb") as f:
     f.write(final_bytes)
 
+# Result
+terminal.printASN1(ieee_data)
 _ = f"bericht opgeslagen in {OUTPUT_PATH}"
 terminal.text(text=_)
