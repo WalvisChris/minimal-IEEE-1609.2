@@ -27,9 +27,9 @@ _gebruikt `lib/TerminalInterface` als CLI._
 
 `enc_signedCert.py` -> `messages/signedCert.txt` -> `dec_signedCert.py`  
 
-**Uitleg:**  
+**Uitleg:** PSID, generation time en expiry time worden opgeslagen als `HeaderInfo`. De payload (bytes) wordt met de HeaderInfo opgeslagen als `ToBeSignedData`. De public key wordt als `VerificationkeyIndicator/EccP256CurvePoint/UncompressedP256` meegegeven als bytes `X` en `Y` (32 byte integers). "pijlagen1234" wordt als name opgeslagen in `CertificateId`. Het begin van de geldigheid van het certificaat wordt als int opgeslagen als `validityPeriod/start`. De duur van de geldigheid van het certificaat wordt als Duration opgeslagen als `validityPeriod/duration`. crl (certificate revocation list) series blijft leeg (int 0) voor de demo. cracaId wordt gedefinieerd als placeholder hash. CertificateId, cracaId, crlSeries, validityPeriod en verifyKeyIndicator worden samen opgeslagen als `ToBeSignedCertificate`. ToBeSignedCertificate wordt met de PRIVATE_KEY gesigneerd en opgeslagen als `SignerIdentifier/Certificate/signature`. IssuerIdentifier wordt gevuld met random placeholder als `SignerIdentifier/Certificate/IssuerIdentifier/sha256AndDigest`. certificate versie is 1 (int). certificate type is 0 (int, explicit). versie, type, issue en ToBeSignedCertificate worden opgeslagen als `SignerIdentifier`. signature wordt gemaakt door ToBeSignedData te hashen en met de PRIVATE_KEY te ondertekenen, en wordt opgeslagen als bytes `R` en `S` (32 byte integers) als `Signature/EcdsaP256Signature`. hashId is 0 (int, sha256). HashId, ToBeSignedData, Signer en Signature worden samen opgeslagen als `SignedData`. Deze wordt in `Ieee1602Dot2Data` presenteer format opgeslagen.  
 
-De ontvanger voert tijdscontrole en signature validatie uit. 
+De ontvanger valideert de signature in het certificaat, de geldigheid van het certificaat, tijdcontrole van het bericht en valideert de signature op ToBeSignedData.   
 
 # Encrypted Data  
 _gebruikt `pyasn1` dmv `lib/asn1/encryptedASN1.py`._  
