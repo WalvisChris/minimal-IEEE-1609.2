@@ -47,4 +47,28 @@ _gebruikt `lib/TerminalInterface` als CLI._
 
 `enc_enveloped.py` -> `messages/enveloped.txt` -> `dec_enveloped.py`  
 
-**Uitleg:**  
+**Uitleg:** TODO...  
+
+# WAVE protocol stack showing detail of WAVE Security Services  
+![2](media/figure2.PNG)
+
+# Cryptographic verification of a signed SPDU with a full certificate chain using explicit certificates  
+![8](media/figure8.PNG)  
+
+# Cryptographic verification of a signed SPDU with a (non-full) certificate chain with implicit end entity certificate  
+![9](media/figure9.PNG)  
+
+# Consistency of permissions between an issuing CA certificate and a subordinate end entity certificate   
+![10](media/figure10.PNG)  
+
+# Consistency of permissions between an issuing CA certificate and a subordinate CA certificate  
+![11](media/figure11.PNG)  
+
+# Relationship between certificate and revocation information  
+![12](media/figure12.PNG)  
+
+# Examples: determining the CRACA certificate for a certificate  
+![14](media/figure14.PNG)  
+
+# Decomposition of a signed SPDU  
+![16](media/figure16.PNG)  
