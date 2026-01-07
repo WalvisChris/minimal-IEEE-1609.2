@@ -1,29 +1,33 @@
 from typing import List
+import time
 import os
 
 class TerminalInterface:
-    COLORS = {
-        "black": "\033[30m",
-        "red": "\033[31m",
-        "green": "\033[32m",
-        "yellow": "\033[33m",
-        "blue": "\033[34m",
-        "magenta": "\033[35m",
-        "cyan": "\033[36m",
-        "white": "\033[37m",
-        "bright_black": "\033[90m",
-        "bright_red": "\033[91m",
-        "bright_green": "\033[92m",
-        "bright_yellow": "\033[93m",
-        "bright_blue": "\033[94m",
-        "bright_magenta": "\033[95m",
-        "bright_cyan": "\033[96m",
-        "bright_white": "\033[97m",
-        "vs_yellow": "\033[38;2;214;194;139m",
-        "vs_purple": "\033[38;2;137;71;252m"
-    }
-
-    RESET = "\033[0m"
+    
+    def __init__(self):
+        self.COLORS = {
+            "black": "\033[30m",
+            "red": "\033[31m",
+            "green": "\033[32m",
+            "yellow": "\033[33m",
+            "blue": "\033[34m",
+            "magenta": "\033[35m",
+            "cyan": "\033[36m",
+            "white": "\033[37m",
+            "bright_black": "\033[90m",
+            "bright_red": "\033[91m",
+            "bright_green": "\033[92m",
+            "bright_yellow": "\033[93m",
+            "bright_blue": "\033[94m",
+            "bright_magenta": "\033[95m",
+            "bright_cyan": "\033[96m",
+            "bright_white": "\033[97m",
+            "vs_yellow": "\033[38;2;214;194;139m",
+            "vs_purple": "\033[38;2;137;71;252m"
+        }
+        self.RESET = "\033[0m"
+        self.start_time = None
+        self.last_timestamp = None
 
     def clear(self):
         os.system('cls')
@@ -197,3 +201,31 @@ class TerminalInterface:
         self.text(text=f"- Encryptie: {output[4]}")
         self.text(text=f"- PskId Validatie: {output[5]}")
         self.empty()
+    
+    def logTimes(self, times: List[tuple], total: float):
+        self.text(text=f"{"TIMESTAMP":<40} : {"TIME":>10}")
+        self.text(text=("=" * 56)) # 40 text + 10 ms + 6 display
+        for text, time in times:
+            self.text(text=f"{text:<40} : {time:>10.4f} ms")
+        self.text(text=("=" * 56)) # 40 text + 10 ms + 6 display
+        self.text(text=f"{"TOTAL":<40} : {total:>10.4f} ms")
+        self.empty()
+
+    def startTimer(self):
+        now = time.perf_counter()
+        self.start_time = now
+        self.last_timestamp = now
+
+    def getTime(self):
+        if self.start_time is None:
+            return None
+        return (time.perf_counter() - self.start_time) * 1000 # milliseconden
+    
+    def getTimeStamp(self):
+        if self.last_timestamp is None:
+            return None
+
+        now = time.perf_counter()
+        delta = now - self.last_timestamp
+        self.last_timestamp = now
+        return delta * 1000  # ms sinds vorige timestamp
