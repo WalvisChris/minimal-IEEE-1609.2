@@ -2,13 +2,12 @@ from lib.asn1.signedCertASN1 import *
 from lib.TerminalInterface import *
 from pyasn1.codec.der import encoder, decoder
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature, Prehashed
 import time
 
 # Paths
-PUBLIC_KEY_PATH = "keys/public_key.pem"
 INPUT_PATH = "messages/msg_signedCert.txt"
 
 # Terminal
@@ -22,9 +21,6 @@ sigCheck = False
 certCheck = False
 
 # Variables
-with open(PUBLIC_KEY_PATH, "rb") as f:
-    PUBLIC_KEY = serialization.load_pem_public_key(f.read())
-
 with open(INPUT_PATH, "rb") as f:
     encoded_data = f.read()
 

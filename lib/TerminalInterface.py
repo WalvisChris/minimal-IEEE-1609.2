@@ -174,41 +174,46 @@ class TerminalInterface:
             if resultaat != None:
                 output[i] = f"{SUCCES}Geldig!{RESET}" if resultaat else f"{FAIL}Ongeldig!{RESET}"
 
-        self.text(text="[Encoding Rapport]:")
-        self.text(text=f"- Bericht Tijdcontrole: {output[1]}")
-        self.text(text=f"- Certificate Tijdcontrole: {output[0]}")
-        self.text(text=f"- Signature Validatie: {output[2]}")
-        self.text(text=f"- Certificate Validatie: {output[3]}")
-        self.text(text=f"- Encryptie: {output[4]}")
-        self.text(text=f"- PskId Validatie: {output[5]}")
+        self.text(text="────────────[Encoding Rapport]────────────")
+        self.text(text=f"{"- Bericht Tijdcontrole":<30} : {output[1]}")
+        self.text(text=f"{"- Certificate Tijdcontrole":<30} : {output[0]}")
+        self.text(text=f"{"- Signature Validatie":<30} : {output[2]}")
+        self.text(text=f"{"- Certificate Validatie":<30} : {output[3]}")
+        self.text(text=f"{"- Encryptie":<30} : {output[4]}")
+        self.text(text=f"{"- PskId Validatie":<30} : {output[5]}")
+        self.text(text="────────────────────────────────────────────────────")
         self.empty()
     
     def logDetailedValidation(self, certTimeMsg=None, timeMsg=None, sigMsg=None, certMsg=None, encMsg=None, pskIdMsg=None):
         resultaten = [certTimeMsg, timeMsg, sigMsg, certMsg, encMsg, pskIdMsg]
         output = ["--", "--", "--", "--", "--", "--"]
-        LOG = self.COLORS['vs_yellow']
+        LOG = self.COLORS['bright_cyan']
         RESET = self.RESET
 
         for i, resultaat in enumerate(resultaten):
             if resultaat != None:
                 output[i] = f"{LOG}{resultaat}{RESET}"
         
-        self.text(text="[Uitgebreid Encoding Rapport]:")
-        self.text(text=f"- Bericht Tijdcontrole: {output[1]}")
-        self.text(text=f"- Certificate Tijdcontrole: {output[0]}")
-        self.text(text=f"- Signature Validatie: {output[2]}")
-        self.text(text=f"- Certificate Validatie: {output[3]}")
-        self.text(text=f"- Encryptie: {output[4]}")
-        self.text(text=f"- PskId Validatie: {output[5]}")
+        self.text(text="─────────────[Encoding Rapport Details]─────────────")
+        self.text(text=f"{"- Bericht Tijdcontrole":<30} : {output[1]}")
+        self.text(text=f"{"- Certificate Tijdcontrole":<30} : {output[0]}")
+        self.text(text=f"{"- Signature Validatie":<30} : {output[2]}")
+        self.text(text=f"{"- Certificate Validatie":<30} : {output[3]}")
+        self.text(text=f"{"- Encryptie":<30} : {output[4]}")
+        self.text(text=f"{"- PskId Validatie":<30} : {output[5]}")
+        self.text(text="────────────────────────────────────────────────────")
         self.empty()
     
     def logTimes(self, times: List[tuple], total: float):
+        LOG = self.COLORS['bright_cyan']
+        TOTAL = self.COLORS['bright_green']
+        RESET = self.RESET
         self.text(text=f"{"TIMESTAMP":<40} : {"TIME":>10}")
         self.text(text=("=" * 56)) # 40 text + 10 ms + 6 display
         for text, time in times:
-            self.text(text=f"{text:<40} : {time:>10.4f} ms")
+            self.text(text=f"{text:<40} : {LOG}{time:>10.4f} ms{RESET}")
         self.text(text=("=" * 56)) # 40 text + 10 ms + 6 display
-        self.text(text=f"{"TOTAL":<40} : {total:>10.4f} ms")
+        self.text(text=f"{TOTAL}{"TOTAL":<40} : {total:>10.4f} ms{RESET}")
         self.empty()
 
     def startTimer(self):
